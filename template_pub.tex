@@ -1,0 +1,172 @@
+\RequirePackage{plautopatch}
+\RequirePackage[l2tabu, orthodox]{nag}
+
+\documentclass[uplatex,dvipdfmx]{jsarticle}
+\usepackage{osukalab_pub_doc}
+\usepackage{epic,eepic}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage[all, warning]{onlyamsmath}
+\usepackage{siunitx}
+\usepackage{txfonts}
+\usepackage{amssymb}
+
+\pagestyle{empty}
+
+\headding{浪花研研究会}%修論の場合はこっち
+%\headding{卒業論文発表会}%卒論の場合はこっち
+
+\title{空気圧回路のみを用いた環境適応する移動機構の提案} 
+
+\department{機械工学専攻}%修論はこっち
+%\department{機械工学科目}%卒論はこっち 
+
+\laboratory{フィールドロコモーション研究室}
+
+\author{大野 泰世}
+
+\date{2026年5月20日}%日付確認のこと
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\section{緒言}
+近年，災害現場や軟弱地盤といった不整地，地面状態および障害物の存在を事前に把握できない未知環境下において，柔軟な構造を持つソフトロボットの活用が期待されている\cite{rus2015design}．
+従来の剛体ロボットは，堅牢な構造であり，予測不能な外部環境の変化に対しては，衝突による破損などで，機体が正常に動作しなくなるリスクがある．
+これに対し，空気圧を用いるソフトロボットは，印加する圧縮空気を調節することで，剛性を高めることも，柔軟な動きをすることもでき，ロボット自身が外部環境に対して形状を変化させることが可能である．このような利点から，従来の剛体ロボットでは踏破できなかった地形や，工場のプラントにおける配管内を探索することなどを目的とした，様々な種類のソフトロボットが開発されている\cite{SoftroboticsTechnologiesandsystemspushingtheboundariesofrobotabilities,PneumaticTubeRobot}．
+こうしたソフトロボットの動力源としては，出力重量比に優れた空気圧アクチュエータが多く利用されている\cite{act9010003}．
+しかし，多くの空気圧駆動ロボットでは，アクチュエータの駆動制御に電磁弁や電子センサなどの電子デバイスが用いられている．電子デバイスは一般に剛性が高いため，柔軟変形を特徴とするソフトロボットへ組み込んだ場合，ロボット全体の柔軟性や環境への適応性を損なう要因となる．
+そのため，強磁場，高温，水中，あるいは防爆が求められる環境では，電子機器を保護するための遮蔽や防水対策が必要となり，システムの大型化や構造の複雑化を招く．
+また，電子制御を前提としたシステムでは，あらかじめ想定された動作や環境条件に基づいて制御則を設計する必要があり，地面状態や障害物の存在を事前に把握できない未知環境では，外乱や接触によって動作が不安定になる可能性がある．
+
+本研究で目指すのは，電子回路や電磁弁などの電子デバイスを一切用いず，圧縮空気の流路と空圧機器だけで構成される空気圧回路によって移動するソフトロボットの開発である．
+このロボットは，空圧アクチュエータを駆動部に用いることで，アクチュエータ部が柔軟に変形し，外力や環境の変化に応じて移動状態を切り替えながら継続的に移動できることを目指す．
+具体的には，空気圧回路が空気圧の流れとバルブの開閉を利用して自身の動作状態を判断し，複数の空気圧アクチュエータを連続的に収縮・膨張させることで周期的な動きを生み出し，外力を受けても連続的な歩行運動を維持することで，自律的に歩行パターンや駆動状態を遷移させながら移動できることを目標とする．
+
+本稿では、まずMcKibben型空圧筋(MPA)とメカニカルバルブを組み合わせたセンサデバイスの基本構成と，それによって電子制御なしで自励振動を生み出す原理について述べる．
+次に，このデバイスを用いた2ユニットおよび3ユニットの空気圧回路の試作について説明し，実験によって振り子のような揺動運動や，円軌道を描く周期運動が確認された．最後に，移動ロボットとしての実用化に向けたアクチュエータの軸長を変えることで運動に変化が期待できることや，安定した歩行を可能にする脚部形状の設計といった今後の展望についてまとめる．
+
+
+\section{空気圧回路およびLT-PAMを用いた脚の基本構成について}
+本章では，浪花らが提案したMcKibben型空圧筋(Low-cost and Tough Pneumatic Muscle：以下LT-PAM)\cite{naniwa2025ltpam}とメカニカルバルブを組み合わせたセンサデバイスの基本構成と，それによって電子制御なしで自励振動を生み出す空気圧回路の動作原理について述べる．また，その空気圧回路によって生成される周期運動をLT-PAMを用いた脚の基本構成について説明する．
+
+\subsection{空気圧回路のセンサデバイスに関して}
+本研究では，後藤らがロボットの動作を空気圧回路によって実現するために，生成される自励振動を解析する目的で提案した空気圧回路\cite{TakahiroGoto2024}を採用する．ここでは，空気圧回路のアクチュエータやセンサとしてLT-PAMを使用する．以下，センサ用に用いるLT-PAMをS-PAM，アクチュエータ用に用いるLT-PAMをA-PAMと呼ぶ．
+空気圧回路の主な構成要素であるセンサデバイスをFig.~\ref{fig:sensor_device}に示す．
+センサデバイスはメカニカルバルブとS-PAMで構成されている．
+S-PAMとメカニカルバルブに計3本のチューブが接続されていて，S-PAMがチューブからの圧縮空気で膨張することで，メカニカルバルブのスイッチを押して，出力が切り替わる．
+S-PAMが収縮すると，メカニカルバルブのスイッチが離されて，出力が元に戻る．このようにして，S-PAMの動きをメカニカルバルブの開閉に変換することができる．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/sensor.png}
+    \caption{Appearance of the sensor device used in the pneumatic circuit.}
+    \label{fig:sensor_device}
+\end{figure}
+
+このセンサデバイスはメカニカルバルブの種類をNO(ノーマルオープン)とNC(ノーマルクローズ)に変えることで，開閉の条件を反転させることができる．
+NOバルブを用いたセンサデバイスの出力変化の概要をFig.~\ref{fig:sensorsetumei2}に示す．S-PAMが膨張しているときは出力がoffになり，S-PAMが収縮すると出力はonになることで圧縮空気が供給される．
+また，NCバルブを用いたセンサデバイスの出力変化の概要をFig.~\ref{fig:sensorsetumei}に示す．S-PAMが膨張しているときは出力がonになることで圧縮空気が供給され，S-PAMが収縮すると出力はoffになる．これらのメカニカルバルブを用いたセンサデバイスで，空気圧回路を構成している．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/sensorsetumei2.png}
+    \caption{Overview of the output changes of the sensor device using the NO valve.}
+    \label{fig:sensorsetumei2}
+\end{figure}    
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/sensorsetumei.png}
+    \caption{Overview of the output changes of the sensor device using the NC valve.}
+    \label{fig:sensorsetumei}
+\end{figure}
+
+\subsection{空気圧回路の構成}
+センサデバイスを複数個用いることで空気圧回路を構成している．
+NO，NCのメカニカルバルブを用いたセンサデバイスを組み合わせることで，S-PAMの動きに応じて出力が切り替わり，自励振動(周期運動)を生み出す．
+この仕組みを利用して，空気圧回路に接続したA-PAMの収縮および膨張の動きを周期的に変化させ，外力に対応しながら移動するロボットを実現できると考えた．
+そこで，まず空気圧回路が生み出す自励振動を確認するために，それぞれのセンサデバイスを1ユニットずつ組み合わせた，2ユニットの基本構成となる空気圧回路を製作し，Fig.~\ref{fig:air_circuit2}にその外観を示す．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/2unit.png}
+    \caption{Appearance of the pneumatic circuit composed of two sensor devices.}
+    \label{fig:air_circuit2}
+\end{figure}
+% 空気圧回路の話をしたい，どのような構成でどのような動きをするのかを説明したい．具体的には，センサデバイスがどのような動きをすると，アクチュエータがどのような動きをするのかを説明したい．ただ，前の章でセンサデバイスの動きを説明しているので，ここでは空気圧回路全体の動きを説明したい．あまりセンサデバイスの細かい話をせず，空気圧回路全体の動きの説明をしたい．
+この空気圧回路は，圧縮空気を印加すると，S-PAMが膨張しているときは出力がoffになり，S-PAMが収縮すると出力がonになるNOバルブを用いたセンサデバイスと，S-PAMが膨張しているときは出力がonになり，S-PAMが収縮すると出力がoffになるNCバルブを用いたセンサデバイスとを組み合わせて構成されている．この構成により，各S-PAMの状態に応じて出力が交互に切り替わり，自励振動が生成される．その結果，2つのA-PAMの収縮および膨張の動きは周期的に入れ替わる．
+
+次に，生物の歩行などといった移動運動は，一般に周期的な運動パターンによって構成される\cite{mcgeer1990passive}．本研究では，空気圧回路により生成される周期運動を利用して移動を実現することを期待し，確認できた周期運動から，ロボットの駆動部に応用することで，前進の動きを実現することを考えた．そこでまず，2つのA-PAMを横並びに配置し，一方の端部を結束バンドで固定した状態であり，もう一方の端部は十分に拘束せず，自由端として実験した．その結果，各A-PAMの収縮・膨張のタイミング差により，端部が左右に揺動する周期運動が確認され，その様子をFig.~\ref{fig:2unitex}に示す．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/2unitex.png}
+    \caption{Periodic motion of the ends swaying from side to side was observed.}
+    \label{fig:2unitex}
+\end{figure}
+しかし，下端部の拘束が不十分であったため，A-PAMの変形を推進に有効な横方向運動へ十分に変換できず，生物の移動にみられるような円弧状の運動の軌跡は確認されなかった．そこで次に，2つのA-PAMの端部を互いに固定し，これらを一体として取り扱うことで，個別の軸方向変位をまとめて1つの駆動機構のように見なして実験をした．確認できた動作は，片側のA-PAMが軸方向に短縮することで，両者の相対的な長さと姿勢が変化し，短縮したA-PAM側に傾く．回路の周期的な運動により，軸方向に短縮するA-PAMが交互に切り替わることで，端部は振り子のように動く(Fig.~\ref{fig:2unitex2})．このような周期運動は，歩行を生み出す基本原理である円弧運動であり，移動ロボットの駆動原理として利用できると考えた．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/2unitex2.png}
+    \caption{By fixing the ends of the two A-MPAs together, a pendulum-like periodic motion was observed.}
+    \label{fig:2unitex2}
+\end{figure}
+
+また，端部の動きを円を描くような周期運動を生み出すために，屈曲する方向を増やすことで，さらに円の軌道に近い運動をすると予測し，3つのA-PAMを用いた3ユニットの回路で実験を進めた．その結果，2ユニット構成で見られた左右方向への単純な往復運動とは異なり，先端部が複数方向へ連続的に屈曲することで，円軌道に近い周期運動が確認された．これは，ユニット数を増加させたことで屈曲方向の自由度が拡大し，各A-PAMの収縮・膨張タイミングの組み合わせによって，運動の軌跡が平面的な揺動運動から円運動へ変化したためである(Fig.~\ref{fig:3unitex})．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/3unitex.png}
+    \caption{By making it 3 units, periodic motion of the ends swaying in a circular trajectory was observed.}
+    \label{fig:3unitex}
+\end{figure}
+
+\subsection{A-MPAで構成する脚の概要}
+
+\section{脚と空気圧回路の相互作用に関する仮説}
+本章では，前章で述べた空気圧回路と脚の相互作用について，仮説を立てる．
+\subsection{脚の周期運動に関する仮説}
+\section{実験結果と今後の取り組み}
+本章では現在までに行った研究の進捗と今後の取り組みについて説明する．実験をすることで確認できた周期運動について説明する．
+\subsection{実験結果}
+
+\subsection{今後の取り組み}
+本研究の目的である，外力に対応しながら移動するロボットの実現に向けて，今後はA-PAMの軸長を伸ばすなどのスケール調整と現在は端部の固定を結束バンドで行っているが，歩行することを前提としたとき，地面と接地する端部の形状を工夫する必要があるため，その試作を進める．A-PAM の軸方向の長さを長くし，駆動部における変位量および周期運動の振幅が増大することを図る．A-PAMを大型化することで，駆動機構として見做した際の可動域が拡大し，より大きな円弧状軌道を伴うことが予想される．つまり，より柔軟な運動の生成が可能になり，外力に対して変形しやすくなることから，本研究の目的でもある，外力に応じて変形しながらも移動し続ける移動機構の実現に寄与すると考えられる．
+さらに，端部の固定具に関しては，ロボットの移動を安定させるために地面との接触面形状が重要である．本研究では，端部を半円状の脚部として構成し，駆動機構の周期的な動きを地面上の滑走運動に変換することを目指す．この形状により，端部の傾き変化が連続的な摺動に変換され，地面上で前進方向へ移動することが可能になると期待する．
+
+また，本研究で検討した移動機構において，2ユニット構成と3ユニット構成では，生成される周期運動に本質的な差異が存在することが示唆された．
+2ユニット構成では，側面から観た際に端部が円運動に近い軌道を描き，その結果として，人間や脚式ロボットに見られる歩行運動に類似した移動が実現される可能性がある．
+一方，3ユニット構成では，端部を上面または下面から観察した際に円軌道を描くような運動が確認された．この運動は，脚式ロボットに見られる前後方向の振り出し運動とは異なり，地面や周りの流体をかき出すことで推進力を得る動作に近い特徴を有している．そのため，3ユニット構成は，従来の脚機構を模倣した移動ではなく，円運動を利用した新たな推進機構として応用できる可能性がある．(Fig.~\ref{fig:MPA3unitsmosiki})．
+\begin{figure}[t]
+    \centering
+%    \includegraphics[width=0.5\linewidth]{figure/MPA_moshikizu.png}
+    \includegraphics[width=0.45\textwidth]{figure/MPA3unitsmosiki.png}
+    \caption{Schematic of the movement generated by the 3-unit configuration.}
+    \label{fig:MPA3unitsmosiki}
+\end{figure}
+
+今後は，これら2種類の構成について固定治具を用いた運動解析および移動性能評価を行い，各構成に適した推進原理を明らかにする予定である．
+また，複数ユニットを組み合わせた脚構造への発展も視野に入れ，従来の骨格・関節モデルに依存しない，新たな移動機構の設計指針を検討していく．
+
+{\small
+%\bibliographystyle{osukalab}
+\bibliographystyle{osukalab}
+\bibliography{myref}
+}
+
+\clearpage
+
+\end{document}
+
+%以下コメント
+
+%ざっと読んだ感じ
+% ・全体の構成はいいと思う
+% ・細かい言葉遣いや、文献の引用不足(引用すべきところでできていない)、段落間での論理の飛躍が見られるのでこれは後ほど
+% ・文章での説明に頼り過ぎていてよくわからない箇所(特に空圧回路の動作機序あたり)があるので、模式図も含めて書いてほしい
+% ・目指したいもの(空圧回路でどんなことができればいいか)を緒言でもう少し説明しないと、2章以降のことが大きな目標に対してどうつながっているか分かりづらい。コレはスライドでの説明でも気をつけてほしい
+% ・やったことはもっとしっかり説明できた方がよい
